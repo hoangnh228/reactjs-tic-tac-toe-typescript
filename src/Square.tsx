@@ -1,16 +1,16 @@
-type SquareProp = {
+type SquareProps = {
   value: string | null
-  highlight: boolean | null
+  highlight: boolean
   onSquareClick: () => void
 }
 
-export default function Square({ value, highlight, onSquareClick }: SquareProp) {
+export default function Square({ value, highlight, onSquareClick }: SquareProps) {
   return (
     <button
       className='square'
       onClick={onSquareClick}
       style={{
-        color: highlight ? 'red' : ''
+        color: highlight ? 'red' : 'inherit'
       }}
     >
       {value}

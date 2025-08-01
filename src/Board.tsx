@@ -1,17 +1,17 @@
 import type { Squares } from './@types/Squares.type'
 import Square from './Square'
 
-type BoardProp = {
+type BoardProps = {
   squares: Squares
   xIsNext: boolean
   onPlay: (squares: Squares) => void
 }
 
-export default function Board({ squares, xIsNext, onPlay }: BoardProp) {
-  const finish = calculateWinner(squares)
+export default function Board({ squares, xIsNext, onPlay }: BoardProps) {
+  const winner = calculateWinner(squares)
 
   const handleSquareClick = (i: number) => () => {
-    if (squares[i] || finish) {
+    if (squares[i] || winner) {
       return
     }
 
@@ -20,29 +20,30 @@ export default function Board({ squares, xIsNext, onPlay }: BoardProp) {
     onPlay(nextSquares)
   }
 
-  let status
-  if (finish) {
-    status = `Winner: ${finish.winner}`
-  } else {
-    if (!squares.includes(null)) {
-      status = 'The result being a draw'
-    } else {
-      status = `Next player: ${xIsNext ? 'X' : 'O'}`
+  const getStatus = () => {
+    if (winner) {
+      return `Winner: ${winner.winner}`
     }
+
+    if (!squares.includes(null)) {
+      return 'The result being a draw'
+    }
+
+    return `Next player: ${xIsNext ? 'X' : 'O'}`
   }
 
   return (
     <>
-      <div className='status'>{status}</div>
-      {[0, 1, 2].map((i) => (
-        <div className='board-row' key={i}>
-          {[0, 1, 2].map((j) => {
-            const index = i * 3 + j
+      <div className='status'>{getStatus()}</div>
+      {[0, 1, 2].map((row) => (
+        <div className='board-row' key={row}>
+          {[0, 1, 2].map((col) => {
+            const index = row * 3 + col
             return (
               <Square
-                key={j}
+                key={col}
                 value={squares[index]}
-                highlight={finish && finish.line.includes(index)}
+                highlight={winner?.line.includes(index) ?? false}
                 onSquareClick={handleSquareClick(index)}
               />
             )
@@ -53,7 +54,12 @@ export default function Board({ squares, xIsNext, onPlay }: BoardProp) {
   )
 }
 
-const calculateWinner = (squares: Squares) => {
+type WinnerResult = {
+  winner: string
+  line: number[]
+} | null
+
+const calculateWinner = (squares: Squares): WinnerResult => {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -69,8 +75,8 @@ const calculateWinner = (squares: Squares) => {
     const [a, b, c] = lines[i]
     if (squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
       return {
-        winner: squares[a],
-        line: lines[i]
+        winner: squares[a]!,
+        line: [a, b, c]
       }
     }
   }
