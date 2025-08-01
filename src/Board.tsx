@@ -8,10 +8,10 @@ type BoardProp = {
 }
 
 export default function Board({ squares, xIsNext, onPlay }: BoardProp) {
-  const winner = calculateWinner(squares)
+  const finish = calculateWinner(squares)
 
   const handleSquareClick = (i: number) => () => {
-    if (squares[i] || winner) {
+    if (squares[i] || finish) {
       return
     }
 
@@ -21,30 +21,34 @@ export default function Board({ squares, xIsNext, onPlay }: BoardProp) {
   }
 
   let status
-  if (winner) {
-    status = `Winner: ${winner}`
+  if (finish) {
+    status = `Winner: ${finish.winner}`
   } else {
-    status = `Next player: ${xIsNext ? 'X' : 'O'}`
+    if (!squares.includes(null)) {
+      status = 'The result being a draw'
+    } else {
+      status = `Next player: ${xIsNext ? 'X' : 'O'}`
+    }
   }
 
   return (
     <>
       <div className='status'>{status}</div>
-      <div className='board-row'>
-        <Square value={squares[0]} onSquareClick={handleSquareClick(0)} />
-        <Square value={squares[1]} onSquareClick={handleSquareClick(1)} />
-        <Square value={squares[2]} onSquareClick={handleSquareClick(2)} />
-      </div>
-      <div className='board-row'>
-        <Square value={squares[3]} onSquareClick={handleSquareClick(3)} />
-        <Square value={squares[4]} onSquareClick={handleSquareClick(4)} />
-        <Square value={squares[5]} onSquareClick={handleSquareClick(5)} />
-      </div>
-      <div className='board-row'>
-        <Square value={squares[6]} onSquareClick={handleSquareClick(6)} />
-        <Square value={squares[7]} onSquareClick={handleSquareClick(7)} />
-        <Square value={squares[8]} onSquareClick={handleSquareClick(8)} />
-      </div>
+      {[0, 1, 2].map((i) => (
+        <div className='board-row' key={i}>
+          {[0, 1, 2].map((j) => {
+            const index = i * 3 + j
+            return (
+              <Square
+                key={j}
+                value={squares[index]}
+                highlight={finish && finish.line.includes(index)}
+                onSquareClick={handleSquareClick(index)}
+              />
+            )
+          })}
+        </div>
+      ))}
     </>
   )
 }
@@ -64,7 +68,10 @@ const calculateWinner = (squares: Squares) => {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i]
     if (squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
-      return squares[a]
+      return {
+        winner: squares[a],
+        line: lines[i]
+      }
     }
   }
 

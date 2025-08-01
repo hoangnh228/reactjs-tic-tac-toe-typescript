@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import Board from './Board'
 import type { Squares } from './@types/Squares.type'
+import Board from './Board'
+import History from './History'
 
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)])
   const [currentMove, setCurrentMove] = useState(0)
+
   const xIsNext = currentMove % 2 === 0
   const currentSquares = history[currentMove]
 
@@ -18,21 +20,6 @@ export default function Game() {
     setCurrentMove(nextMove)
   }
 
-  const moves = history.map((squares, index) => {
-    let description
-    if (index > 0) {
-      description = `Go to move #${index}`
-    } else {
-      description = 'Go to game start'
-    }
-
-    return (
-      <li key={index}>
-        <button onClick={() => jumpTo(index)}>{description}</button>
-      </li>
-    )
-  })
-
   return (
     <>
       <div className='game'>
@@ -40,7 +27,7 @@ export default function Game() {
           <Board squares={currentSquares} xIsNext={xIsNext} onPlay={handlePlay} />
         </div>
         <div className='game-info'>
-          <ol>{moves}</ol>
+          <History history={history} currentMove={currentMove} jumpTo={jumpTo} />
         </div>
       </div>
     </>
